@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>MonthlyCarLoan - Car Loan Payment Calculator</title>
+<meta name="description" content="Free car loan payment calculator — enter loan amount, interest, term and down payment to get monthly payment, total interest, and payoff date." />
+<meta name="robots" content="index,follow" />
+<!-- Open Graph -->
+<meta property="og:title" content="MonthlyCarLoan - Car Loan Payment Calculator" />
+<meta property="og:description" content="Free car loan payment calculator — monthly payment, total interest, amortization schedule." />
+<meta property="og:type" content="website" />
+<!-- Basic styling -->
+<style>
+:root{--maxw:920px;--accent:#0b76d1;--muted:#666}
+*{box-sizing:border-box;font-family:Inter,Roboto,Arial,Helvetica,sans-serif}
+body{margin:0;background:#f7fafc;color:#0b1a2b;display:flex;justify-content:center;padding:28px}
+.wrap{max-width:var(--maxw);width:100%;background:#fff;border-radius:10px;box-shadow:0 6px 30px rgba(8,20,40,0.06);padding:28px}
+h1{margin:0 0 8px;font-size:22px}
+p.lead{margin:0 0 18px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+label{display:block;font-size:13px;margin-bottom:6px;color:#223}
+input[type="number"],select{width:100%;padding:10px;border:1px solid #e6eef6;border-radius:6px;font-size:15px}
+.full{grid-column:1/-1}
+button{background:var(--accent);color:#fff;border:0;padding:12px 14px;border-radius:8px;font-weight:600;cursor:pointer}
+.results{margin-top:18px;padding:14px;border-radius:8px;background:#f1f8ff;border:1px solid #e3f0ff}
+.row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.muted{color:var(--muted);font-size:13px}
+table{width:100%;border-collapse:collapse;margin-top:8px}
+table th, table td{padding:6px;border-bottom:1px solid #eef7ff;font-size:13px;text-align:left}
+.ad-placeholder{margin:16px 0;padding:12px;border:1px dashed #cdd7e7;border-radius:6px;color:#556}
+footer{margin-top:18px;font-size:13px;color:var(--muted)}
+@media(max-width:720px){.grid{grid-template-columns:1fr}.full{grid-column:auto}}
+</style>
+
+<!-- JSON-LD schema (WebApplication + FAQ) -->
+<script type="application/ld+json">
+{
+"@context":"https://schema.org",
+"@type":"WebApplication",
+"name":"MonthlyCarLoan - Car Loan Payment Calculator",
+"description":"Calculate monthly car loan payments, total interest, and view a simple amortization summary.",
+"url":"https://monthlycarloan.com",
+"applicationCategory":"FinanceApplication"
+}
+</script>
+</head>
+<body>
+<div class="wrap" role="main">
+<h1>Car Loan Payment Calculator</h1>
+<p class="lead">Enter your loan details to calculate monthly payment, total interest, and payoff date. No signup required.</p>
+
+<div class="grid" id="calcForm">
+<div>
+<label for="price">Vehicle Price ($)</label>
+<input id="price" type="number" value="30000" min="0" />
+</div>
+<div>
+<label for="down">Down Payment ($)</label>
+<input id="down" type="number" value="2000" min="0" />
+</div>
+<div>
+<label for="rate">Interest Rate (APR %)</label>
+<input id="rate" type="number" step="0.01" value="5.5" min="0" />
+</div>
+<div>
+<label for="term">Loan Term (months)</label>
+<input id="term" type="number" value="60" min="1" />
+</div>
+<div class="full">
+<label for="start">Loan Start Date</label>
+<input id="start" type="date" />
+</div>
+<div class="full" style="display:flex;gap:10px;align-items:center">
+<button id="calcBtn">Calculate Payment</button>
+<button id="resetBtn" type="button" style="background:#eee;color:#012">Reset</button>
+</div>
+</div>
+
+<div class="ad-placeholder">[Ad slot: place top banner / responsive ad here]</div>
+
+<div id="results" class="results" hidden>
+<div class="row"><div class="muted">Monthly Payment</div><div id="monthlyPay" style="font-weight:700;font-size:20px"></div></div>
+<div class="row"><div class="muted">Total Interest Paid</div><div id="totalInterest"></div></div>
+<div class="row"><div class="muted">Total Paid (Principal + Interest)</div><div id="totalPaid"></div></div>
+<div class="row"><div class="muted">Estimated Payoff Date</div><div id="payoffDate"></div></div>
+
+<div style="margin-top:10px;display:flex;gap:8px">
+<button id="printBtn" style="background:#0a6f3f">Print</button>
+<button id="emailBtn" style="background:#333">Email Results</button>
+<button id="amortBtn" style="background:#ff8c00">Show Amortization</button>
+</div>
+
+<div id="amortWrap" style="margin-top:12px;display:none">
+<div class="muted">First 12 months of amortization</div>
+<table id="amortTable"><thead><tr><th>Month</th><th>Payment</th><th>Interest</th><th>Principal</th><th>Balance</th></tr></thead><tbody></tbody></table>
+</div>
+
+<div class="ad-placeholder" style="margin-top:12px">[Ad slot: place mid-content ad or affiliate CTA here]</div>
+</div>
+
+<footer>
+<div>FAQ: <strong>How are payments calculated?</strong> We use standard amortizing loan formulas. For precise legal/financial advice, consult a loan specialist.</div>
+</footer>
+</div>
+
+<script>
+// Utility functions
+function currency(n){return n.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2})}
+function addMonths(date, months){ let d = new Date(date); d.setMonth(d.getMonth() + months); return d; }
+
+function calculateLoan(P, rAnnual, nMonths){
+if(nMonths<=0) return {monthly:0,totalInterest:0,totalPaid:P};
+const r = (rAnnual/100)/12; // monthly rate
+// monthly payment formula
+const monthly = r === 0 ? P / nMonths : (P * r) / (1 - Math.pow(1 + r, -nMonths));
+const totalPaid = monthly * nMonths;
+const totalInterest = totalPaid - P;
+return {monthly, totalInterest, totalPaid};
+}
+
+function buildAmort(P, rAnnual, nMonths, monthly){
+const r = (rAnnual/100)/12;
+let balance = P;
+const rows = [];
+for(let m=1;m<=Math.min(nMonths,12);m++){
+const interest = balance * r;
+const principal = monthly - interest;
+balance = Math.max(0, balance - principal);
+rows.push({m, payment:monthly, interest, principal, balance});
+}
+return rows;
+}
+
+// DOM interactions
+const price = document.getElementById('price');
+const down = document.getElementById('down');
+const rate = document.getElementById('rate');
+const term = document.getElementById('term');
+const start = document.getElementById('start');
+const calcBtn = document.getElementById('calcBtn');
+const resetBtn = document.getElementById('resetBtn');
+const results = document.getElementById('results');
+const monthlyPay = document.getElementById('monthlyPay');
+const totalInterest = document.getElementById('totalInterest');
+const totalPaid = document.getElementById('totalPaid');
+const payoffDate = document.getElementById('payoffDate');
+const printBtn = document.getElementById('printBtn');
+const emailBtn = document.getElementById('emailBtn');
+const amortBtn = document.getElementById('amortBtn');
+const amortWrap = document.getElementById('amortWrap');
+const amortTable = document.querySelector('#amortTable tbody');
+
+// default start date: today
+start.valueAsDate = new Date();
+
+function doCalculate(){
+const vehiclePrice = parseFloat(price.value) || 0;
+const downPayment = parseFloat(down.value) || 0;
+const principal = Math.max(0, vehiclePrice - downPayment);
+const apr = parseFloat(rate.value) || 0;
+const n = parseInt(term.value) || 0;
+if(n<=0){ alert('Enter a valid loan term in months'); return; }
+
+const result = calculateLoan(principal, apr, n);
+monthlyPay.textContent = currency(result.monthly);
+totalInterest.textContent = currency(result.totalInterest);
+totalPaid.textContent = currency(result.totalPaid);
+
+// payoff date
+const sd = start.value ? new Date(start.value) : new Date();
+const payoff = addMonths(sd, n);
+payoffDate.textContent = payoff.toLocaleDateString();
+
+// save results for email
+results.dataset.json = JSON.stringify({
+vehiclePrice, downPayment, principal, apr, n,
+monthly: result.monthly, totalInterest: result.totalInterest, totalPaid: result.totalPaid, payoff: payoff.toISOString()
+});
+
+// show results
+results.hidden = false;
+amortWrap.style.display = 'none';
+amortTable.innerHTML = '';
+}
+
+function doReset(){
+price.value = 30000; down.value = 2000; rate.value = 5.5; term.value = 60; start.valueAsDate = new Date();
+results.hidden = true;
+amortWrap.style.display = 'none';
+amortTable.innerHTML = '';
+}
+
+calcBtn.addEventListener('click', doCalculate);
+resetBtn.addEventListener('click', doReset);
+printBtn.addEventListener('click', ()=>window.print());
+
+emailBtn.addEventListener('click', ()=>{
+if(!results.dataset.json){ alert('Please calculate first'); return; }
+const r = JSON.parse(results.dataset.json);
+const subject = encodeURIComponent('My Car Loan Payment Results');
+const body = encodeURIComponent(
+`Vehicle price: $${r.vehiclePrice}\nDown payment: $${r.downPayment}\nPrincipal: $${r.principal}\nAPR: ${r.apr}%\nTerm: ${r.n} months\n\nMonthly payment: ${currency(r.monthly)}\nTotal interest: ${currency(r.totalInterest)}\nTotal paid: ${currency(r.totalPaid)}\nPayoff date: ${new Date(r.payoff).toLocaleDateString()}`
+);
+window.location.href = `mailto:?subject=${subject}&body=${body}`;
+});
+
+amortBtn.addEventListener('click', ()=>{
+if(!results.dataset.json){ alert('Please calculate first'); return; }
+const r = JSON.parse(results.dataset.json);
+const rows = buildAmort(r.principal, r.apr, r.n, r.monthly);
+amortTable.innerHTML = rows.map(row => `
+<tr>
+<td>${row.m}</td>
+<td>${currency(row.payment)}</td>
+<td>${currency(row.interest)}</td>
+<td>${currency(row.principal)}</td>
+<td>${currency(row.balance)}</td>
+</tr>`).join('');
+amortWrap.style.display = 'block';
+window.scrollTo({top:amortWrap.offsetTop - 40, behavior:'smooth'});
+});
+
+// Optionally auto-calc on load
+// doCalculate();
+</script>
+</body>
+</html>
