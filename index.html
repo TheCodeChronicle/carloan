@@ -1,228 +1,838 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" style="scroll-behavior: smooth;">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>MonthlyCarLoan - Car Loan Payment Calculator</title>
-<meta name="description" content="Free car loan payment calculator — enter loan amount, interest, term and down payment to get monthly payment, total interest, and payoff date." />
-<meta name="robots" content="index,follow" />
-<!-- Open Graph -->
-<meta property="og:title" content="MonthlyCarLoan - Car Loan Payment Calculator" />
-<meta property="og:description" content="Free car loan payment calculator — monthly payment, total interest, amortization schedule." />
-<meta property="og:type" content="website" />
-<!-- Basic styling -->
-<style>
-:root{--maxw:920px;--accent:#0b76d1;--muted:#666}
-*{box-sizing:border-box;font-family:Inter,Roboto,Arial,Helvetica,sans-serif}
-body{margin:0;background:#f7fafc;color:#0b1a2b;display:flex;justify-content:center;padding:28px}
-.wrap{max-width:var(--maxw);width:100%;background:#fff;border-radius:10px;box-shadow:0 6px 30px rgba(8,20,40,0.06);padding:28px}
-h1{margin:0 0 8px;font-size:22px}
-p.lead{margin:0 0 18px;color:var(--muted)}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-label{display:block;font-size:13px;margin-bottom:6px;color:#223}
-input[type="number"],select{width:100%;padding:10px;border:1px solid #e6eef6;border-radius:6px;font-size:15px}
-.full{grid-column:1/-1}
-button{background:var(--accent);color:#fff;border:0;padding:12px 14px;border-radius:8px;font-weight:600;cursor:pointer}
-.results{margin-top:18px;padding:14px;border-radius:8px;background:#f1f8ff;border:1px solid #e3f0ff}
-.row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.muted{color:var(--muted);font-size:13px}
-table{width:100%;border-collapse:collapse;margin-top:8px}
-table th, table td{padding:6px;border-bottom:1px solid #eef7ff;font-size:13px;text-align:left}
-.ad-placeholder{margin:16px 0;padding:12px;border:1px dashed #cdd7e7;border-radius:6px;color:#556}
-footer{margin-top:18px;font-size:13px;color:var(--muted)}
-@media(max-width:720px){.grid{grid-template-columns:1fr}.full{grid-column:auto}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Loan Payoff Calculator: Calculate Your Savings</title>
+    <meta name="description" content="Calculate how much interest and time you can save by making extra monthly or one-time payments on your car loan.">
 
-<!-- JSON-LD schema (WebApplication + FAQ) -->
-<script type="application/ld+json">
-{
-"@context":"https://schema.org",
-"@type":"WebApplication",
-"name":"MonthlyCarLoan - Car Loan Payment Calculator",
-"description":"Calculate monthly car loan payments, total interest, and view a simple amortization summary.",
-"url":"https://monthlycarloan.com",
-"applicationCategory":"FinanceApplication"
-}
-</script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3794502422207734"
+     crossorigin="anonymous"></script>
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary-blue': '#1D4ED8',
+                        'accent-cyan': '#06B6D4',
+                        'surface-light': '#F8FAFC',
+                        'danger-red': '#EF4444',
+                    },
+                    boxShadow: {
+                        'soft': '0 8px 20px rgba(0, 0, 0, 0.04)',
+                        'xl-soft': '0 25px 50px rgba(0, 0, 0, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for aesthetic enhancements and animations */
+        .loan-input-field {
+            /* REVERTED: Now using a subtle gray border (border border-gray-300) */
+            @apply w-full p-3 border border-gray-300 rounded-xl focus:ring-accent-cyan focus:border-accent-cyan transition duration-300 shadow-sm bg-white;
+        }
+
+        .loan-input-field.invalid {
+            @apply border-danger-red ring-danger-red/50;
+        }
+
+        .cta-button {
+            @apply w-full py-3 px-6 rounded-2xl font-bold text-lg transition duration-300 transform hover:scale-[1.01] shadow-xl;
+        }
+
+        /* Gradient for Hero */
+        .hero-bg {
+            background: linear-gradient(145deg, #E0F2FE, #DBEAFE);
+        }
+
+        /* Animation class for results */
+        .fade-slide-up {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInSlideUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        
+        @keyframes fadeInSlideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Staggered chart bar animation */
+        .chart-bar-animate {
+            animation: barGrow 0.5s ease-out forwards;
+            opacity: 0;
+        }
+        
+        @keyframes barGrow {
+            0% { transform: scaleY(0); opacity: 0; }
+            100% { transform: scaleY(1); opacity: 1; }
+        }
+
+        /* Custom scrollbar for amortization table */
+        #amortizationTableContainer {
+            overflow-x: auto;
+            /* Enhance scrolling experience on touch devices */
+            -webkit-overflow-scrolling: touch;
+        }
+        #amortizationTableContainer::-webkit-scrollbar {
+            height: 6px;
+        }
+        #amortizationTableContainer::-webkit-scrollbar-thumb {
+            background-color: #94A3B8;
+            border-radius: 10px;
+        }
+
+        /* Style for print output (PDF/Print) */
+        @media print {
+            body {
+                background-color: white !important;
+                color: black !important;
+            }
+            nav, footer, .hidden-print, .cta-button, .faq-section {
+                display: none !important;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+            #resultsComparison, #amortizationSchedule {
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            .hero-bg, .bg-primary-blue\/5 {
+                background: white !important;
+            }
+        }
+    </style>
 </head>
-<body>
-<div class="wrap" role="main">
-<h1>Car Loan Payment Calculator</h1>
-<p class="lead">Enter your loan details to calculate monthly payment, total interest, and payoff date. No signup required.</p>
+<body class="bg-surface-light font-sans text-gray-800">
 
-<div class="grid" id="calcForm">
-<div>
-<label for="price">Vehicle Price ($)</label>
-<input id="price" type="number" value="30000" min="0" />
-</div>
-<div>
-<label for="down">Down Payment ($)</label>
-<input id="down" type="number" value="2000" min="0" />
-</div>
-<div>
-<label for="rate">Interest Rate (APR %)</label>
-<input id="rate" type="number" step="0.01" value="5.5" min="0" />
-</div>
-<div>
-<label for="term">Loan Term (months)</label>
-<input id="term" type="number" value="60" min="1" />
-</div>
-<div class="full">
-<label for="start">Loan Start Date</label>
-<input id="start" type="date" />
-</div>
-<div class="full" style="display:flex;gap:10px;align-items:center">
-<button id="calcBtn">Calculate Payment</button>
-<button id="resetBtn" type="button" style="background:#eee;color:#012">Reset</button>
-</div>
-</div>
+    <!-- Navigation Bar -->
+    <nav class="bg-white/95 backdrop-blur-sm sticky top-0 z-50 shadow-soft">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
+            <!-- Logo - Updated with uploaded image path -->
+            <a href="#" class="flex items-center">
+                <img src="uploaded:logo2.jpg-83ade154-3460-484c-894c-9cda5e6a214f" alt="Monthly Car Loans Logo" class="h-10 w-auto rounded-lg">
+            </a>
+            <!-- Nav CTA -->
+            <a href="#calculator" class="hidden sm:inline-block text-sm font-semibold text-primary-blue hover:text-accent-cyan transition duration-300">
+                Start Calculation
+            </a>
+        </div>
+    </nav>
 
-<div class="ad-placeholder">[Ad slot: place top banner / responsive ad here]</div>
+    <!-- Hero Section -->
+    <section class="hero-bg py-20 md:py-32 border-b border-blue-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 items-center gap-12">
+            
+            <!-- Hero Text -->
+            <div class="md:order-1">
+                <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight mb-4">
+                    Pay Off Your Car Loan <span class="text-primary-blue">Years Earlier</span>
+                </h1>
+                <p class="text-xl text-gray-600 mb-8 max-w-lg">
+                    Use our simple calculator to see how extra payments can **reduce your total interest cost by thousands** and shorten your term.
+                </p>
+                <a href="#calculator" class="inline-block bg-primary-blue text-white cta-button w-auto px-12 py-3 shadow-primary-blue/40">
+                    Get Your Payoff Plan
+                </a>
+            </div>
 
-<div id="results" class="results" hidden>
-<div class="row"><div class="muted">Monthly Payment</div><div id="monthlyPay" style="font-weight:700;font-size:20px"></div></div>
-<div class="row"><div class="muted">Total Interest Paid</div><div id="totalInterest"></div></div>
-<div class="row"><div class="muted">Total Paid (Principal + Interest)</div><div id="totalPaid"></div></div>
-<div class="row"><div class="muted">Estimated Payoff Date</div><div id="payoffDate"></div></div>
+            <!-- Hero Visual Card (Improved Responsiveness) -->
+            <div class="md:order-2 flex justify-center items-center">
+                <div class="relative w-full max-w-sm h-64">
+                    <!-- Main Card -->
+                    <div class="absolute inset-0 bg-white rounded-3xl shadow-xl-soft border border-gray-100 p-6 flex flex-col justify-end">
+                        <p class="text-sm font-semibold text-primary-blue mb-1">Projected Savings Impact</p>
+                        <h3 class="text-4xl font-extrabold text-accent-cyan" id="heroSavings">$5,142</h3>
+                        <p class="text-sm text-gray-500 mt-1">Total Interest Reduction</p>
+                        
+                        <!-- Simple Chart Simulation -->
+                        <div class="w-full h-16 mt-4 flex items-end overflow-hidden">
+                            <div class="w-1/3 h-1/4 bg-primary-blue/20 rounded-t-sm"></div>
+                            <div class="w-1/3 h-2/4 bg-primary-blue/50 rounded-t-sm ml-1"></div>
+                            <div class="w-1/3 h-full bg-primary-blue rounded-t-sm ml-1"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Floating Accent Card - Adjusted for better mobile look -->
+                    <div class="absolute top-0 right-1/2 transform translate-x-1/2 -translate-y-1/2 sm:top-4 sm:-right-4 sm:translate-x-0 sm:translate-y-0 w-40 h-16 bg-accent-cyan rounded-xl shadow-lg flex items-center justify-center p-2 transition duration-300">
+                        <p class="text-xl font-bold text-white">42 Mo Saved</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<div style="margin-top:10px;display:flex;gap:8px">
-<button id="printBtn" style="background:#0a6f3f">Print</button>
-<button id="emailBtn" style="background:#333">Email Results</button>
-<button id="amortBtn" style="background:#ff8c00">Show Amortization</button>
-</div>
+    <!-- Calculator Section -->
+    <section id="calculator" class="py-16 md:py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <h2 class="text-3xl font-bold text-center mb-12">Your Financial Roadmap Starts Here</h2>
 
-<div id="amortWrap" style="margin-top:12px;display:none">
-<div class="muted">First 12 months of amortization</div>
-<table id="amortTable"><thead><tr><th>Month</th><th>Payment</th><th>Interest</th><th>Principal</th><th>Balance</th></tr></thead><tbody></tbody></table>
-</div>
+            <div class="bg-white p-6 md:p-10 rounded-3xl shadow-xl-soft border border-gray-100 grid lg:grid-cols-12 gap-8">
+                
+                <!-- Loan Inputs Column -->
+                <div class="lg:col-span-4 border-r lg:pr-8 border-gray-100">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-primary-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2v2m-6 0h12a4 4 0 004-4V7a4 4 0 00-4-4H6a4 4 0 00-4 4v7a4 4 0 004 4z"></path></svg>
+                        Loan Inputs
+                    </h3>
+                    <form id="loanForm" onsubmit="event.preventDefault(); calculateLoan();">
+                        
+                        <!-- Principal -->
+                        <div class="mb-5">
+                            <label for="principal" class="block text-sm font-medium text-gray-700 mb-2">Loan Amount ($)</label>
+                            <input type="number" id="principal" value="25000" min="1000" class="loan-input-field" oninput="calculateLoan()" required>
+                            <p id="principalError" class="text-xs text-danger-red mt-1 hidden">Please enter a valid amount.</p>
+                        </div>
+                        
+                        <!-- Rate -->
+                        <div class="mb-5">
+                            <label for="rate" class="block text-sm font-medium text-gray-700 mb-2">Annual Interest Rate (%)</label>
+                            <input type="number" id="rate" value="6.5" min="0.1" max="50" step="0.1" class="loan-input-field" oninput="calculateLoan()" required>
+                            <p id="rateError" class="text-xs text-danger-red mt-1 hidden">Rate must be between 0.1% and 50%.</p>
+                        </div>
+                        
+                        <!-- Term -->
+                        <div class="mb-5">
+                            <label for="term" class="block text-sm font-medium text-gray-700 mb-2">Term Length (Months)</label>
+                            <select id="term" class="loan-input-field appearance-none" onchange="calculateLoan()">
+                                <option value="36">36 Months (3 Years)</option>
+                                <option value="60" selected>60 Months (5 Years)</option>
+                                <option value="72">72 Months (6 Years)</option>
+                                <option value="84">84 Months (7 Years)</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Extra Payments Group -->
+                        <div class="mb-8 p-4 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                            <h4 class="font-semibold text-gray-800 mb-3">Accelerated Payoff Options</h4>
 
-<div class="ad-placeholder" style="margin-top:12px">[Ad slot: place mid-content ad or affiliate CTA here]</div>
-</div>
+                            <!-- Monthly Extra Payment -->
+                            <div class="mb-4">
+                                <label for="extraMonthly" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Extra Monthly Payment ($)
+                                </label>
+                                <input type="number" id="extraMonthly" value="50" min="0" step="10" class="loan-input-field" oninput="calculateLoan()">
+                            </div>
+                            
+                            <!-- One-Time Extra Payment -->
+                            <div>
+                                <label for="extraOneTime" class="block text-sm font-medium text-gray-700 mb-2">
+                                    One-Time Payment Now ($)
+                                </label>
+                                <input type="number" id="extraOneTime" value="0" min="0" step="100" class="loan-input-field" oninput="calculateLoan()">
+                            </div>
+                        </div>
+                        
+                        <div class="flex space-x-4">
+                            <button type="submit" class="cta-button bg-primary-blue text-white shadow-primary-blue/30 flex items-center justify-center lg:w-3/4" id="calculateBtn">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a4 4 0 01-4-4V7a4 4 0 014-4h10a4 4 0 014 4v10a4 4 0 01-4 4z"></path></svg>
+                                Calculate Payoff
+                            </button>
+                            <button type="button" class="cta-button bg-gray-200 text-gray-700 shadow-none lg:w-1/4" onclick="resetDefaults()">
+                                Reset
+                            </button>
+                        </div>
+                    </form>
+                </div>
 
-<footer>
-<div>FAQ: <strong>How are payments calculated?</strong> We use standard amortizing loan formulas. For precise legal/financial advice, consult a loan specialist.</div>
-</footer>
-</div>
+                <!-- Results Column -->
+                <div class="lg:col-span-8">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-accent-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v14c0 1.105-.895 2-2 2H9c-1.105 0-2-.895-2-2v-1h-2"></path></svg>
+                        Comparison Results & Impact
+                    </h3>
+                    
+                    <!-- Comparison View -->
+                    <div id="resultsComparison" class="grid grid-cols-2 gap-4 mb-8 text-center">
+                        <!-- Header -->
+                        <div class="text-lg font-bold text-gray-700 p-2 border-b-2 border-primary-blue/30">Standard Loan</div>
+                        <div class="text-lg font-bold text-gray-700 p-2 border-b-2 border-accent-cyan/30">Accelerated Plan</div>
 
-<script>
-// Utility functions
-function currency(n){return n.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2})}
-function addMonths(date, months){ let d = new Date(date); d.setMonth(d.getMonth() + months); return d; }
+                        <!-- Row 1: Monthly Payment -->
+                        <div class="bg-gray-50 p-4 rounded-xl shadow-soft">
+                            <p class="text-sm font-medium text-gray-500">Monthly Payment</p>
+                            <p id="stdMonthlyPayment" class="text-2xl font-extrabold text-primary-blue mt-1">--</p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-xl shadow-soft">
+                            <p class="text-sm font-medium text-gray-500">Total Monthly Outlay</p>
+                            <p id="accelTotalOutlay" class="text-2xl font-extrabold text-accent-cyan mt-1">--</p>
+                        </div>
 
-function calculateLoan(P, rAnnual, nMonths){
-if(nMonths<=0) return {monthly:0,totalInterest:0,totalPaid:P};
-const r = (rAnnual/100)/12; // monthly rate
-// monthly payment formula
-const monthly = r === 0 ? P / nMonths : (P * r) / (1 - Math.pow(1 + r, -nMonths));
-const totalPaid = monthly * nMonths;
-const totalInterest = totalPaid - P;
-return {monthly, totalInterest, totalPaid};
-}
+                        <!-- Row 2: Total Interest -->
+                        <div class="bg-gray-50 p-4 rounded-xl shadow-soft">
+                            <p class="text-sm font-medium text-gray-500">Total Interest Paid</p>
+                            <p id="stdTotalInterest" class="text-2xl font-extrabold text-gray-800 mt-1">--</p>
+                        </div>
+                        <div class="bg-primary-blue/5 p-4 rounded-xl shadow-soft">
+                            <p class="text-sm font-medium text-primary-blue">Total Interest Paid</p>
+                            <p id="accelTotalInterest" class="text-2xl font-extrabold text-primary-blue mt-1">--</p>
+                        </div>
+                        
+                        <!-- Row 3: Time and Savings -->
+                        <div class="bg-gray-50 p-4 rounded-xl shadow-soft">
+                            <p class="text-sm font-medium text-gray-500">Payoff Length</p>
+                            <p id="stdLength" class="text-2xl font-extrabold text-gray-800 mt-1">--</p>
+                        </div>
+                        <div class="bg-accent-cyan/10 p-4 rounded-xl shadow-soft">
+                            <p class="text-sm font-medium text-accent-cyan">Payoff Length (Saved)</p>
+                            <p id="accelLength" class="text-2xl font-extrabold text-accent-cyan mt-1">--</p>
+                        </div>
 
-function buildAmort(P, rAnnual, nMonths, monthly){
-const r = (rAnnual/100)/12;
-let balance = P;
-const rows = [];
-for(let m=1;m<=Math.min(nMonths,12);m++){
-const interest = balance * r;
-const principal = monthly - interest;
-balance = Math.max(0, balance - principal);
-rows.push({m, payment:monthly, interest, principal, balance});
-}
-return rows;
-}
+                        <!-- Savings Highlight (Spans both columns) -->
+                        <div id="savingsHighlight" class="col-span-2 bg-primary-blue text-white p-4 rounded-xl shadow-lg fade-slide-up hidden" style="animation-delay: 0.5s;">
+                            <p class="text-xl font-semibold">Total Savings:</p>
+                            <p id="totalSavedAmount" class="text-4xl font-extrabold mt-1">$0.00</p>
+                        </div>
+                    </div>
 
-// DOM interactions
-const price = document.getElementById('price');
-const down = document.getElementById('down');
-const rate = document.getElementById('rate');
-const term = document.getElementById('term');
-const start = document.getElementById('start');
-const calcBtn = document.getElementById('calcBtn');
-const resetBtn = document.getElementById('resetBtn');
-const results = document.getElementById('results');
-const monthlyPay = document.getElementById('monthlyPay');
-const totalInterest = document.getElementById('totalInterest');
-const totalPaid = document.getElementById('totalPaid');
-const payoffDate = document.getElementById('payoffDate');
-const printBtn = document.getElementById('printBtn');
-const emailBtn = document.getElementById('emailBtn');
-const amortBtn = document.getElementById('amortBtn');
-const amortWrap = document.getElementById('amortWrap');
-const amortTable = document.querySelector('#amortTable tbody');
+                    <!-- Chart & Action Buttons -->
+                    <div class="mt-8 bg-white p-6 rounded-xl shadow-soft border border-gray-100">
+                        <h4 class="text-lg font-semibold mb-4 text-gray-900">Principal vs. Interest Breakdown</h4>
+                        <div id="amortizationChart" class="h-48 flex items-end justify-between p-2">
+                            <p id="chartMessage" class="text-center w-full text-gray-500">Enter loan details to generate the chart.</p>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-500 mt-2">
+                            <span>Start</span>
+                            <span id="chartEndMonth">End</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex space-x-4 mt-6 hidden-print">
+                        <button class="flex-1 py-3 px-6 bg-gray-700 text-white rounded-xl hover:bg-gray-800 transition duration-300" onclick="printSchedule()">
+                            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m0 0v-4a2 2 0 012-2h2a2 2 0 012 2v4m-4 0v4m-4-4v4m4 0h4m-4 0v-4"></path></svg>
+                            Print Schedule (PDF)
+                        </button>
+                        <button class="flex-1 py-3 px-6 bg-accent-cyan text-white rounded-xl hover:bg-accent-cyan/90 transition duration-300" onclick="shareResults()">
+                            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.882 13.342 9.079 13.41 9.237 13.568L12.568 16.899C12.726 17.057 12.794 17.254 12.794 17.452V19.999C12.794 20.306 12.556 20.544 12.249 20.544H4.345C4.038 20.544 3.8 20.306 3.8 19.999V4.001C3.8 3.694 4.038 3.456 4.345 3.456H12.249C12.556 3.456 12.794 3.694 12.794 4.001V6.548C12.794 6.746 12.726 6.943 12.568 7.101L9.237 10.432C9.079 10.59 8.882 10.658 8.684 10.658H4.345C4.038 10.658 3.8 10.896 3.8 11.203V13.342H8.684Z M18.196 11.203V17.452H14.865L18.196 13.568L18.196 11.203Z M19.655 10.658C19.962 10.658 20.2 10.896 20.2 11.203V19.999C20.2 20.306 19.962 20.544 19.655 20.544H14.865C14.558 20.544 14.32 20.306 14.32 19.999V17.452H11.516V13.342H14.32V11.203C14.32 10.896 14.558 10.658 14.865 10.658H19.655Z"></path></svg>
+                            Share Results
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Disclaimer -->
+            <p class="text-center text-sm text-gray-500 mt-8 p-4 bg-yellow-100 rounded-xl border border-yellow-300">
+                **Important Disclaimer:** This calculator provides estimates based on standard amortization formulas. Always confirm your exact payoff amount, payment allocation rules, and any potential prepayment penalties directly with your lender.
+            </p>
+        </div>
+    </section>
 
-// default start date: today
-start.valueAsDate = new Date();
+    <!-- Amortization Schedule Section -->
+    <section id="amortizationSchedule" class="bg-primary-blue/5 py-16 md:py-20 border-t border-b border-blue-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center mb-4">Deep Dive: Amortization Schedule</h2>
+            <p class="text-center text-lg text-gray-600 mb-10 max-w-2xl mx-auto">
+                See the full month-by-month breakdown of how your payments are split and how the accelerated plan shortens your loan.
+            </p>
 
-function doCalculate(){
-const vehiclePrice = parseFloat(price.value) || 0;
-const downPayment = parseFloat(down.value) || 0;
-const principal = Math.max(0, vehiclePrice - downPayment);
-const apr = parseFloat(rate.value) || 0;
-const n = parseInt(term.value) || 0;
-if(n<=0){ alert('Enter a valid loan term in months'); return; }
+            <!-- Amortization Table -->
+            <div class="bg-white p-6 rounded-3xl shadow-xl-soft border border-gray-100">
+                <h3 class="text-xl font-semibold mb-4 text-gray-900">Monthly Payoff Timeline (Accelerated Plan)</h3>
+                <div id="amortizationTableContainer" class="h-96">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead>
+                            <tr class="sticky top-0 bg-white shadow-sm">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mo.</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-primary-blue uppercase tracking-wider">Principal</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-accent-cyan uppercase tracking-wider">Interest</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody id="amortizationBody" class="divide-y divide-gray-100">
+                            <tr><td colspan="5" class="p-6 text-center text-gray-500">Schedule will appear here after calculation.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
 
-const result = calculateLoan(principal, apr, n);
-monthlyPay.textContent = currency(result.monthly);
-totalInterest.textContent = currency(result.totalInterest);
-totalPaid.textContent = currency(result.totalPaid);
+    <!-- FAQ Section (Hidden in print) -->
+    <section class="py-16 md:py-20 faq-section hidden-print">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center mb-10">Frequently Asked Questions</h2>
+            
+            <div id="faq-accordion" class="space-y-4">
+                
+                <div class="bg-white rounded-xl shadow-soft border border-gray-100">
+                    <button class="w-full text-left p-5 flex justify-between items-center text-lg font-semibold" onclick="toggleFaq(1)">
+                        What does 'Amortization' mean?
+                        <span id="icon-1" class="text-primary-blue transform transition duration-300">+</span>
+                    </button>
+                    <div id="content-1" class="hidden px-5 pb-5 text-gray-600 border-t border-gray-100 pt-4">
+                        Amortization refers to paying off debt with a fixed repayment schedule in regular installments over a period of time. With each payment, the portion applied to the principal increases, while the interest portion decreases.
+                    </div>
+                </div>
 
-// payoff date
-const sd = start.value ? new Date(start.value) : new Date();
-const payoff = addMonths(sd, n);
-payoffDate.textContent = payoff.toLocaleDateString();
+                <div class="bg-white rounded-xl shadow-soft border border-gray-100">
+                    <button class="w-full text-left p-5 flex justify-between items-center text-lg font-semibold" onclick="toggleFaq(2)">
+                        How does an 'Extra Payment' save me interest?
+                        <span id="icon-2" class="text-primary-blue transform transition duration-300">+</span>
+                    </button>
+                    <div id="content-2" class="hidden px-5 pb-5 text-gray-600 border-t border-gray-100 pt-4">
+                        Any extra money you pay is usually applied directly to the **principal balance**. Since interest is calculated based on your remaining principal, reducing that balance faster means less interest will accrue over the life of the loan, saving you money and time.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-// save results for email
-results.dataset.json = JSON.stringify({
-vehiclePrice, downPayment, principal, apr, n,
-monthly: result.monthly, totalInterest: result.totalInterest, totalPaid: result.totalPaid, payoff: payoff.toISOString()
-});
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white/70 py-10 hidden-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p class="text-lg font-semibold mb-4 text-white">Monthly Car Loans</p>
+            <p class="text-sm mb-6">
+                &copy; 2025 Monthly Car Loans. All rights reserved. Calculations are estimates.
+            </p>
+        </div>
+    </footer>
 
-// show results
-results.hidden = false;
-amortWrap.style.display = 'none';
-amortTable.innerHTML = '';
-}
+    <!-- JavaScript Logic -->
+    <script>
+        // --- Global State and Utilities ---
+        const formatter = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        });
 
-function doReset(){
-price.value = 30000; down.value = 2000; rate.value = 5.5; term.value = 60; start.valueAsDate = new Date();
-results.hidden = true;
-amortWrap.style.display = 'none';
-amortTable.innerHTML = '';
-}
+        const timeFormatter = (months) => {
+            if (months < 12) return `${Math.round(months)} months`;
+            const years = Math.floor(months / 12);
+            const remainingMonths = Math.round(months % 12);
+            if (remainingMonths === 0) return `${years} years`;
+            return `${years}y ${remainingMonths}m`;
+        };
 
-calcBtn.addEventListener('click', doCalculate);
-resetBtn.addEventListener('click', doReset);
-printBtn.addEventListener('click', ()=>window.print());
+        let currentLoanDetails = null;
+        let isCalculating = false;
 
-emailBtn.addEventListener('click', ()=>{
-if(!results.dataset.json){ alert('Please calculate first'); return; }
-const r = JSON.parse(results.dataset.json);
-const subject = encodeURIComponent('My Car Loan Payment Results');
-const body = encodeURIComponent(
-`Vehicle price: $${r.vehiclePrice}\nDown payment: $${r.downPayment}\nPrincipal: $${r.principal}\nAPR: ${r.apr}%\nTerm: ${r.n} months\n\nMonthly payment: ${currency(r.monthly)}\nTotal interest: ${currency(r.totalInterest)}\nTotal paid: ${currency(r.totalPaid)}\nPayoff date: ${new Date(r.payoff).toLocaleDateString()}`
-);
-window.location.href = `mailto:?subject=${subject}&body=${body}`;
-});
+        // --- Core Financial Calculations ---
 
-amortBtn.addEventListener('click', ()=>{
-if(!results.dataset.json){ alert('Please calculate first'); return; }
-const r = JSON.parse(results.dataset.json);
-const rows = buildAmort(r.principal, r.apr, r.n, r.monthly);
-amortTable.innerHTML = rows.map(row => `
-<tr>
-<td>${row.m}</td>
-<td>${currency(row.payment)}</td>
-<td>${currency(row.interest)}</td>
-<td>${currency(row.principal)}</td>
-<td>${currency(row.balance)}</td>
-</tr>`).join('');
-amortWrap.style.display = 'block';
-window.scrollTo({top:amortWrap.offsetTop - 40, behavior:'smooth'});
-});
+        /** Calculates the fixed monthly payment (PMT). */
+        function calculatePMT(P, i, n) {
+            if (i === 0) return P / n;
+            // Formula: P * [i(1 + i)^n] / [(1 + i)^n - 1]
+            return P * (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
+        }
 
-// Optionally auto-calc on load
-// doCalculate();
-</script>
+        /** Generates the amortization schedule. */
+        function generateAmortization(principal, i, standardPayment, extraMonthly = 0, oneTimePayment = 0) {
+            let balance = principal;
+            const schedule = [];
+            const extraTotal = standardPayment + extraMonthly;
+            let currentPaymentNum = 1;
+            let totalInterestPaid = 0;
+
+            // Apply one-time payment immediately to principal
+            if (oneTimePayment > 0) {
+                balance = Math.max(0, balance - oneTimePayment);
+            }
+
+            const maxPayments = 240 * 2; // Max 40 years just in case
+            
+            while (balance > 0.01 && currentPaymentNum <= maxPayments) {
+                const interestPayment = balance * i;
+                const totalPayment = extraTotal; // Monthly extra + standard PMT
+                
+                let principalPayment = totalPayment - interestPayment;
+
+                if (interestPayment >= totalPayment && currentPaymentNum > 1) {
+                    // This scenario should only happen if loan terms are impossible or payment is too low
+                    console.warn("Payment insufficient to cover interest. Stopping.");
+                    break;
+                }
+
+                // Final payment adjustment
+                if (principalPayment >= balance) {
+                    principalPayment = balance;
+                    balance = 0;
+                } else {
+                    balance -= principalPayment;
+                }
+                
+                totalInterestPaid += interestPayment;
+
+                schedule.push({
+                    number: currentPaymentNum,
+                    payment: totalPayment,
+                    principal: principalPayment,
+                    interest: interestPayment,
+                    balance: balance,
+                });
+
+                currentPaymentNum++;
+            }
+
+            return { schedule, totalInterestPaid, termMonths: currentPaymentNum - 1 };
+        }
+
+        // --- Validation and Main Controller ---
+
+        function validateInputs(P, annualRate) {
+            let isValid = true;
+            
+            const principalInput = document.getElementById('principal');
+            const rateInput = document.getElementById('rate');
+
+            // Principal Validation
+            if (isNaN(P) || P <= 0 || P > 1000000) {
+                principalInput.classList.add('invalid');
+                document.getElementById('principalError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                principalInput.classList.remove('invalid');
+                document.getElementById('principalError').classList.add('hidden');
+            }
+
+            // Rate Validation
+            if (isNaN(annualRate) || annualRate <= 0.1 || annualRate > 50) {
+                rateInput.classList.add('invalid');
+                document.getElementById('rateError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                rateInput.classList.remove('invalid');
+                document.getElementById('rateError').classList.add('hidden');
+            }
+
+            return isValid;
+        }
+
+        function calculateLoan() {
+            if (isCalculating) return;
+            isCalculating = true;
+            
+            showLoadingState();
+
+            // Get inputs
+            const P = parseFloat(document.getElementById('principal').value);
+            const annualRate = parseFloat(document.getElementById('rate').value);
+            const n = parseInt(document.getElementById('term').value, 10);
+            const extraMonthly = parseFloat(document.getElementById('extraMonthly').value) || 0;
+            const extraOneTime = parseFloat(document.getElementById('extraOneTime').value) || 0;
+
+            if (!validateInputs(P, annualRate)) {
+                hideLoadingState();
+                isCalculating = false;
+                return;
+            }
+
+            const i = annualRate / 100 / 12; // Monthly Interest Rate
+
+            // 1. Standard Loan Calculation
+            const standardPayment = calculatePMT(P, i, n);
+            const standardLoan = generateAmortization(P, i, standardPayment, 0, 0);
+
+            // 2. Accelerated Loan Calculation
+            const acceleratedLoan = generateAmortization(P, i, standardPayment, extraMonthly, extraOneTime);
+            
+            // 3. Comparison Metrics
+            const interestSaved = standardLoan.totalInterestPaid - acceleratedLoan.totalInterestPaid;
+            const timeSavedMonths = standardLoan.termMonths - acceleratedLoan.termMonths;
+            
+            // Check for negative savings (shouldn't happen unless rate is extremely low and payment is tiny, but good boundary check)
+            const finalInterestSaved = Math.max(0, interestSaved);
+
+            currentLoanDetails = {
+                P, i, n, standardPayment, extraMonthly, extraOneTime,
+                standard: standardLoan,
+                accelerated: acceleratedLoan,
+                interestSaved: finalInterestSaved,
+                timeSavedMonths,
+            };
+            
+            setTimeout(() => {
+                updateUI(currentLoanDetails);
+                hideLoadingState();
+                isCalculating = false;
+            }, 300); // Small delay to show loading and allow animation to reset
+        }
+        
+        // --- UI Update Functions ---
+
+        /** Utility function to animate numbers */
+        function countUp(targetId, finalValue, formatFn) {
+            const element = document.getElementById(targetId);
+            if (!element) return;
+            
+            const startValue = parseFloat(element.getAttribute('data-current-value') || 0);
+            const duration = 500; // ms
+            const startTime = performance.now();
+
+            function step(timestamp) {
+                const elapsed = timestamp - startTime;
+                const progress = Math.min(1, elapsed / duration);
+                const currentValue = startValue + (finalValue - startValue) * progress;
+                
+                element.textContent = formatFn(currentValue);
+                element.setAttribute('data-current-value', currentValue.toFixed(2));
+
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                } else {
+                    element.textContent = formatFn(finalValue);
+                    element.setAttribute('data-current-value', finalValue.toFixed(2));
+                }
+            }
+            requestAnimationFrame(step);
+        }
+
+        function updateUI(results) {
+            if (!results) return;
+
+            // 1. Comparison Cards Update (with CountUp animation)
+            
+            // Standard
+            countUp('stdMonthlyPayment', results.standardPayment, formatter.format);
+            countUp('stdTotalInterest', results.standard.totalInterestPaid, formatter.format);
+            document.getElementById('stdLength').textContent = timeFormatter(results.standard.termMonths);
+            
+            // Accelerated
+            countUp('accelTotalOutlay', results.standardPayment + results.extraMonthly, formatter.format);
+            countUp('accelTotalInterest', results.accelerated.totalInterestPaid, formatter.format);
+            document.getElementById('accelLength').textContent = `${timeFormatter(results.accelerated.termMonths)} (${timeFormatter(results.timeSavedMonths)} saved)`;
+
+            // Savings Highlight
+            const highlightEl = document.getElementById('savingsHighlight');
+            if (results.timeSavedMonths > 0 || results.extraOneTime > 0) {
+                 highlightEl.classList.remove('hidden');
+                 countUp('totalSavedAmount', results.interestSaved, formatter.format);
+            } else {
+                highlightEl.classList.add('hidden');
+            }
+
+            // 2. Amortization Table Update
+            const amortizationBody = document.getElementById('amortizationBody');
+            amortizationBody.innerHTML = ''; 
+
+            results.accelerated.schedule.forEach(p => {
+                const row = amortizationBody.insertRow();
+                row.className = 'hover:bg-gray-50 transition duration-150';
+                row.innerHTML = `
+                    <td class="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${p.number}</td>
+                    <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-700">${formatter.format(p.payment)}</td>
+                    <td class="px-6 py-3 whitespace-nowrap text-sm text-primary-blue font-medium">${formatter.format(p.principal)}</td>
+                    <td class="px-6 py-3 whitespace-nowrap text-sm text-accent-cyan">${formatter.format(p.interest)}</td>
+                    <td class="px-6 py-3 whitespace-nowrap text-sm font-bold text-gray-900">${formatter.format(p.balance)}</td>
+                `;
+            });
+            
+            // 3. Chart Update
+            renderAmortizationChart(results.accelerated.schedule);
+        }
+
+        function renderAmortizationChart(schedule) {
+            const chartEl = document.getElementById('amortizationChart');
+            chartEl.innerHTML = '';
+            
+            // Show up to 12 bars (annual data, or every 6 months for long terms)
+            const step = schedule.length > 72 ? 6 : 12;
+            
+            const annualData = schedule.filter(p => p.number % step === 0 || p.number === schedule.length);
+
+            if (annualData.length === 0) {
+                 chartEl.innerHTML = '<p id="chartMessage" class="text-center w-full text-gray-500">No data for chart visualization.</p>';
+                 return;
+            }
+
+            document.getElementById('chartEndMonth').textContent = timeFormatter(schedule.length);
+
+            const maxInterest = Math.max(...annualData.map(p => p.interest));
+            const maxPrincipal = Math.max(...annualData.map(p => p.principal));
+            const maxVal = Math.max(maxInterest, maxPrincipal);
+            
+            annualData.forEach((p, index) => {
+                const interestHeight = (p.interest / maxVal) * 100;
+                const principalHeight = (p.principal / maxVal) * 100;
+                const monthText = p.number === schedule.length ? 'Final' : `Mo ${p.number}`;
+
+                // Bar container
+                const bar = document.createElement('div');
+                bar.className = 'flex flex-col justify-end w-4 md:w-6 h-full relative group cursor-pointer chart-bar-animate';
+                bar.style.animationDelay = `${index * 0.05}s`; // Staggered animation
+                bar.style.transformOrigin = 'bottom';
+                
+                // Tooltip (Advanced Hover State)
+                const tooltip = document.createElement('div');
+                tooltip.className = 'absolute bottom-full mb-2 p-2 bg-gray-800 text-white text-xs rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap transform -translate-x-1/2 left-1/2';
+                tooltip.innerHTML = `
+                    <span class="font-bold">${monthText}</span><br>
+                    P: ${formatter.format(p.principal)}<br>
+                    I: ${formatter.format(p.interest)}
+                `;
+
+                // Interest Segment (Bottom)
+                const interestSegment = document.createElement('div');
+                interestSegment.style.height = `${interestHeight * 0.8}%`;
+                interestSegment.className = 'bg-accent-cyan transition-all duration-300 rounded-t-sm';
+
+                // Principal Segment (Top)
+                const principalSegment = document.createElement('div');
+                principalSegment.style.height = `${principalHeight * 0.8}%`;
+                principalSegment.className = 'bg-primary-blue transition-all duration-300';
+
+                // Label (Month/Year)
+                const label = document.createElement('span');
+                label.className = 'absolute -bottom-5 text-xs text-gray-600 w-full text-center';
+                label.textContent = monthText.includes('Final') ? 'End' : (p.number / step).toFixed(0) + (step === 12 ? 'Y' : 'S'); // Y=Year, S=Step
+
+                bar.appendChild(tooltip);
+                bar.appendChild(principalSegment);
+                bar.appendChild(interestSegment);
+                bar.appendChild(label);
+                chartEl.appendChild(bar);
+            });
+            
+            // Add Legend
+            const legend = document.createElement('div');
+            legend.className = 'absolute top-0 right-0 p-3 text-xs font-medium bg-white/80 rounded-lg shadow-md border border-gray-100';
+            legend.innerHTML = `
+                <div class="flex items-center mb-1"><span class="w-3 h-3 bg-primary-blue rounded-full mr-2"></span> Principal</div>
+                <div class="flex items-center"><span class="w-3 h-3 bg-accent-cyan rounded-full mr-2"></span> Interest</div>
+            `;
+            chartEl.style.position = 'relative';
+            chartEl.appendChild(legend);
+        }
+
+        // --- Loading and UI Functions ---
+        function showLoadingState() {
+            const btn = document.getElementById('calculateBtn');
+            btn.innerHTML = '<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Calculating...';
+            btn.disabled = true;
+        }
+
+        function hideLoadingState() {
+            const btn = document.getElementById('calculateBtn');
+            btn.innerHTML = '<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a4 4 0 01-4-4V7a4 4 0 014-4h10a4 4 0 014 4v10a4 4 0 01-4 4z"></path></svg> Calculate Payoff';
+            btn.disabled = false;
+        }
+
+        function resetDefaults() {
+            document.getElementById('principal').value = '25000';
+            document.getElementById('rate').value = '6.5';
+            document.getElementById('term').value = '60';
+            document.getElementById('extraMonthly').value = '50';
+            document.getElementById('extraOneTime').value = '0';
+            document.getElementById('principal').classList.remove('invalid');
+            document.getElementById('rate').classList.remove('invalid');
+            document.getElementById('principalError').classList.add('hidden');
+            document.getElementById('rateError').classList.add('hidden');
+            calculateLoan();
+        }
+        
+        function toggleFaq(id) {
+            const content = document.getElementById(`content-${id}`);
+            const icon = document.getElementById(`icon-${id}`);
+            const isHidden = content.classList.contains('hidden');
+
+            document.querySelectorAll('[id^="content-"]').forEach(el => {
+                if(el.id !== `content-${id}`) el.classList.add('hidden');
+            });
+            document.querySelectorAll('[id^="icon-"]').forEach(el => {
+                 if(el.id !== `icon-${id}`) el.textContent = '+';
+            });
+
+            if (isHidden) {
+                content.classList.remove('hidden');
+                icon.textContent = '–';
+            } else {
+                content.classList.add('hidden');
+                icon.textContent = '+';
+            }
+        }
+        
+        function printSchedule() {
+            window.print();
+        }
+
+        function shareResults() {
+            if (!currentLoanDetails) {
+                console.error("No calculation results to share.");
+                return;
+            }
+
+            const loan = currentLoanDetails;
+            const P = formatter.format(loan.P);
+            const rate = (loan.i * 12 * 100).toFixed(1) + '%';
+            const term = loan.n;
+            const extraM = formatter.format(loan.extraMonthly);
+            const extraOT = formatter.format(loan.extraOneTime);
+            const savedI = formatter.format(loan.interestSaved);
+            const savedT = timeFormatter(loan.timeSavedMonths);
+            const finalTerm = timeFormatter(loan.accelerated.termMonths);
+
+            const shareText = `
+Loan Payoff Plan Summary:
+------------------------------
+Principal: ${P} @ ${rate} over ${term} months.
+Standard Payment: ${formatter.format(loan.standardPayment)}
+
+My Accelerated Plan:
+Monthly Extra: ${extraM}
+One-Time Extra: ${extraOT}
+New Payoff Length: ${finalTerm}
+
+Total Interest Saved: ${savedI}
+Time Saved: ${savedT}
+#AutoLoanPayoff
+            `.trim();
+
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(shareText).then(() => {
+                    const btn = document.querySelector('button[onclick="shareResults()"]');
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = 'Results Copied! (Ready to Paste)';
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Could not copy text: ', err);
+                    alert('Could not copy results to clipboard. Please check console for details.');
+                });
+            } else {
+                // Fallback for environments without modern clipboard API
+                const textArea = document.createElement("textarea");
+                textArea.value = shareText;
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    alert("Results copied to clipboard!");
+                } catch (err) {
+                    alert('Unable to copy. Please manually select and copy the text.');
+                }
+                document.body.removeChild(textArea);
+            }
+        }
+
+        // Initial run on load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set initial value for data-current-value attributes to 0 for countUp animation start
+            document.querySelectorAll('[id$="Payment"], [id$="Interest"], #totalSavedAmount').forEach(el => {
+                el.setAttribute('data-current-value', '0');
+            });
+            calculateLoan();
+        });
+    </script>
 </body>
 </html>
