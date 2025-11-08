@@ -133,20 +133,62 @@
 </head>
 <body class="bg-surface-light font-sans text-gray-800">
 
-    <!-- Navigation Bar -->
-    <nav class="bg-white/95 backdrop-blur-sm sticky top-0 z-50 shadow-soft">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
-            <!-- Logo - Updated to Text Logo -->
-                <h2 class="text-xl font-extrabold text-gray-900 leading-none">
-                    Monthly Car Loan <span class="text-primary-blue">Calculator</span>
-                </h2>
-            </a>
-            <!-- Nav CTA -->
-            <a href="#calculator" class="hidden sm:inline-block text-sm font-semibold text-primary-blue hover:text-accent-cyan transition duration-300">
-                Start Calculation
-            </a>
-        </div>
-    </nav>
+    <!-- Header / Navbar -->
+<header class="bg-white shadow-sm sticky top-0 z-50 hidden-print">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center py-4">
+      <!-- Logo -->
+      <a href="/" class="text-2xl font-extrabold text-gray-900">
+        Monthly Car Loan <span class="text-primary-blue">Calculator</span>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav class="hidden md:flex space-x-6 text-sm font-medium">
+        <a href="/" class="hover:text-primary-blue transition-colors">Home</a>
+        <a href="/about.html" class="hover:text-primary-blue transition-colors">About</a>
+        <a href="/privacy.html" class="hover:text-primary-blue transition-colors">Privacy</a>
+        <a href="/contact.html" class="hover:text-primary-blue transition-colors">Contact</a>
+      </nav>
+
+      <!-- Mobile Menu Button -->
+      <button id="menu-toggle" class="md:hidden text-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-cyan rounded-lg p-2">
+        <!-- Hamburger icon -->
+        <svg id="menu-open-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        <!-- Close icon -->
+        <svg id="menu-close-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Nav Menu -->
+  <nav id="mobile-menu" class="md:hidden hidden border-t border-gray-200 bg-white shadow-inner">
+    <div class="px-4 py-4 flex flex-col space-y-3 text-sm font-medium">
+      <a href="/" class="hover:text-primary-blue transition-colors">Home</a>
+      <a href="/about.html" class="hover:text-primary-blue transition-colors">About</a>
+      <a href="/privacy.html" class="hover:text-primary-blue transition-colors">Privacy</a>
+      <a href="/contact.html" class="hover:text-primary-blue transition-colors">Contact</a>
+    </div>
+  </nav>
+</header>
+
+<!-- Script for Mobile Menu Toggle -->
+<script>
+  const menuToggle = document.getElementById('menu-toggle');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const openIcon = document.getElementById('menu-open-icon');
+  const closeIcon = document.getElementById('menu-close-icon');
+
+  menuToggle.addEventListener('click', () => {
+    mobileMenu.classList.toggle('hidden');
+    openIcon.classList.toggle('hidden');
+    closeIcon.classList.toggle('hidden');
+  });
+</script>
+
 
     <!-- Hero Section -->
     <section class="hero-bg py-20 md:py-32 border-b border-blue-100">
@@ -199,37 +241,39 @@
 
             <div class="bg-white p-6 md:p-10 rounded-3xl shadow-xl-soft border border-gray-100 grid lg:grid-cols-12 gap-8">
                 
-                <!-- Loan Inputs Column -->
-                <div class="lg:col-span-4 border-r lg:pr-8 border-gray-100">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-                        <svg class="w-5 h-5 mr-2 text-primary-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2v2m-6 0h12a4 4 0 004-4V7a4 4 0 00-4-4H6a4 4 0 00-4 4v7a4 4 0 004 4z"></path></svg>
-                        Loan Inputs
-                    </h3>
+               <!-- Loan Inputs Column -->
+                <div class="lg:col-span-4">
                     <form id="loanForm" onsubmit="event.preventDefault(); calculateLoan();">
                         
-                        <!-- Principal -->
-                        <div class="mb-5">
-                            <label for="principal" class="block text-sm font-medium text-gray-700 mb-2">Loan Amount ($)</label>
-                            <input type="number" id="principal" value="25000" min="1000" class="loan-input-field" oninput="calculateLoan()" required>
-                            <p id="principalError" class="text-xs text-danger-red mt-1 hidden">Please enter a valid amount.</p>
-                        </div>
-                        
-                        <!-- Rate -->
-                        <div class="mb-5">
-                            <label for="rate" class="block text-sm font-medium text-gray-700 mb-2">Annual Interest Rate (%)</label>
-                            <input type="number" id="rate" value="6.5" min="0.1" max="50" step="0.1" class="loan-input-field" oninput="calculateLoan()" required>
-                            <p id="rateError" class="text-xs text-danger-red mt-1 hidden">Rate must be between 0.1% and 50%.</p>
-                        </div>
-                        
-                        <!-- Term -->
-                        <div class="mb-5">
-                            <label for="term" class="block text-sm font-medium text-gray-700 mb-2">Term Length (Months)</label>
-                            <select id="term" class="loan-input-field appearance-none" onchange="calculateLoan()">
-                                <option value="36">36 Months (3 Years)</option>
-                                <option value="60" selected>60 Months (5 Years)</option>
-                                <option value="72">72 Months (6 Years)</option>
-                                <option value="84">84 Months (7 Years)</option>
-                            </select>
+                        <!-- Loan Inputs Group -->
+                        <div class="mb-8 p-4 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                            <h4 class="font-semibold text-gray-800 mb-3">Loan Inputs</h4>
+                            
+                            <!-- Principal -->
+                            <div class="mb-5">
+                                <label for="principal" class="block text-sm font-medium text-gray-700 mb-2">Loan Amount ($)</label>
+                                <input type="number" id="principal" value="25000" min="1000" class="loan-input-field" oninput="calculateLoan()" required>
+                                <p id="principalError" class="text-xs text-danger-red mt-1 hidden">Please enter a valid amount.</p>
+                            </div>
+                            
+                            <!-- Rate -->
+                            <div class="mb-5">
+                                <label for="rate" class="block text-sm font-medium text-gray-700 mb-2">Annual Interest Rate (%)</label>
+                                <input type="number" id="rate" value="6.5" min="0.1" max="50" step="0.1" class="loan-input-field" oninput="calculateLoan()" required>
+                                <p id="rateError" class="text-xs text-danger-red mt-1 hidden">Rate must be between 0.1% and 50%.</p>
+                            </div>
+                            
+                            <!-- Term -->
+                            <div class="mb-5">
+                                <label for="term" class="block text-sm font-medium text-gray-700 mb-2">Term Length (Months)</label>
+                                <select id="term" class="loan-input-field appearance-none" onchange="calculateLoan()">
+                                    <option value="36">36 Months (3 Years)</option>
+									<option value="48">48 Months (4 Years)</option>
+                                    <option value="60" selected>60 Months (5 Years)</option>
+                                    <option value="72">72 Months (6 Years)</option>
+                                    <option value="84">84 Months (7 Years)</option>
+                                </select>
+                            </div>
                         </div>
                         
                         <!-- Extra Payments Group -->
@@ -379,45 +423,89 @@
         </div>
     </section>
 
-    <!-- FAQ Section (Hidden in print) -->
-    <section class="py-16 md:py-20 faq-section hidden-print">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl font-bold text-center mb-10">Frequently Asked Questions</h2>
-            
-            <div id="faq-accordion" class="space-y-4">
-                
-                <div class="bg-white rounded-xl shadow-soft border border-gray-100">
-                    <button class="w-full text-left p-5 flex justify-between items-center text-lg font-semibold" onclick="toggleFaq(1)">
-                        What does 'Amortization' mean?
-                        <span id="icon-1" class="text-primary-blue transform transition duration-300">+</span>
-                    </button>
-                    <div id="content-1" class="hidden px-5 pb-5 text-gray-600 border-t border-gray-100 pt-4">
-                        Amortization refers to paying off debt with a fixed repayment schedule in regular installments over a period of time. With each payment, the portion applied to the principal increases, while the interest portion decreases.
-                    </div>
-                </div>
+<!-- FAQ Section (Hidden in print) -->
+<section class="py-16 md:py-20 faq-section hidden-print">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h2 class="text-3xl font-bold text-center mb-10">Frequently Asked Questions</h2>
 
-                <div class="bg-white rounded-xl shadow-soft border border-gray-100">
-                    <button class="w-full text-left p-5 flex justify-between items-center text-lg font-semibold" onclick="toggleFaq(2)">
-                        How does an 'Extra Payment' save me interest?
-                        <span id="icon-2" class="text-primary-blue transform transition duration-300">+</span>
-                    </button>
-                    <div id="content-2" class="hidden px-5 pb-5 text-gray-600 border-t border-gray-100 pt-4">
-                        Any extra money you pay is usually applied directly to the **principal balance**. Since interest is calculated based on your remaining principal, reducing that balance faster means less interest will accrue over the life of the loan, saving you money and time.
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    <div id="faq-accordion" class="space-y-4">
 
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-white/70 py-10 hidden-print">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <p class="text-lg font-semibold mb-4 text-white">Monthly Car Loans</p>
-            <p class="text-sm mb-6">
-                &copy; 2025 MonthlyCarLoans.com All rights reserved. Calculations are estimates.
-            </p>
+      <!-- FAQ 1 -->
+      <div class="bg-white rounded-xl shadow-soft border border-gray-100">
+        <button class="w-full text-left p-5 flex justify-between items-center text-lg font-semibold" onclick="toggleFaq(1)">
+          What does 'Amortization' mean?
+          <span id="icon-1" class="text-primary-blue transform transition duration-300">+</span>
+        </button>
+        <div id="content-1" class="hidden px-5 pb-5 text-gray-600 border-t border-gray-100 pt-4">
+          Amortization refers to paying off debt with a fixed repayment schedule in regular installments over time. With each payment, the portion applied to the principal increases, while the interest portion decreases.
         </div>
-    </footer>
+      </div>
+
+      <!-- FAQ 2 -->
+      <div class="bg-white rounded-xl shadow-soft border border-gray-100">
+        <button class="w-full text-left p-5 flex justify-between items-center text-lg font-semibold" onclick="toggleFaq(2)">
+          How does an 'Extra Payment' save me interest?
+          <span id="icon-2" class="text-primary-blue transform transition duration-300">+</span>
+        </button>
+        <div id="content-2" class="hidden px-5 pb-5 text-gray-600 border-t border-gray-100 pt-4">
+          Any extra money you pay is usually applied directly to the <strong>principal balance</strong>. Since interest is calculated based on your remaining principal, reducing that balance faster means less interest will accrue over the life of the loan.
+        </div>
+      </div>
+
+      <!-- FAQ 3 -->
+      <div class="bg-white rounded-xl shadow-soft border border-gray-100">
+        <button class="w-full text-left p-5 flex justify-between items-center text-lg font-semibold" onclick="toggleFaq(3)">
+          How accurate is this car loan calculator?
+          <span id="icon-3" class="text-primary-blue transform transition duration-300">+</span>
+        </button>
+        <div id="content-3" class="hidden px-5 pb-5 text-gray-600 border-t border-gray-100 pt-4">
+          This calculator provides accurate estimates based on your inputs, but actual loan payments may vary depending on lender fees, credit approval, and local taxes.
+        </div>
+      </div>
+
+      <!-- FAQ 4 -->
+      <div class="bg-white rounded-xl shadow-soft border border-gray-100">
+        <button class="w-full text-left p-5 flex justify-between items-center text-lg font-semibold" onclick="toggleFaq(4)">
+          Can I use this calculator for leasing?
+          <span id="icon-4" class="text-primary-blue transform transition duration-300">+</span>
+        </button>
+        <div id="content-4" class="hidden px-5 pb-5 text-gray-600 border-t border-gray-100 pt-4">
+          This tool is designed for auto loans, not leases. Lease payments are calculated differently and depend on residual value and money factor.
+        </div>
+      </div>
+
+      <!-- FAQ 5 -->
+      <div class="bg-white rounded-xl shadow-soft border border-gray-100">
+        <button class="w-full text-left p-5 flex justify-between items-center text-lg font-semibold" onclick="toggleFaq(5)">
+          What’s the difference between APR and interest rate?
+          <span id="icon-5" class="text-primary-blue transform transition duration-300">+</span>
+        </button>
+        <div id="content-5" class="hidden px-5 pb-5 text-gray-600 border-t border-gray-100 pt-4">
+          The APR includes the interest rate plus any lender fees, showing your total cost of borrowing over the loan term.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+   <!-- Footer -->
+<footer class="bg-gray-900 text-white/70 py-10 hidden-print">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <p class="text-lg font-semibold mb-2 text-white">MonthlyCarLoan.com</p>
+    <p class="text-sm mb-4">
+      &copy; 2025 MonthlyCarLoan.com. All rights reserved. Calculations are estimates only.
+    </p>
+
+    <p class="flex flex-col sm:flex-row justify-center items-center gap-2 sm:space-x-3 text-sm">
+      <a href="/about.html" class="hover:text-white transition-colors">About</a>
+      <span class="hidden sm:inline text-gray-500">|</span>
+      <a href="/privacy.html" class="hover:text-white transition-colors">Privacy</a>
+      <span class="hidden sm:inline text-gray-500">|</span>
+      <a href="/contact.html" class="hover:text-white transition-colors">Contact</a>
+    </p>
+  </div>
+</footer>
 
     <!-- JavaScript Logic -->
     <script>
@@ -851,12 +939,3 @@ Time Saved: ${savedT}
 </body>
 
 </html>
-
-
-
-
-
-
-
-
-
